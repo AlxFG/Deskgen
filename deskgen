@@ -1,0 +1,26 @@
+#!/bin/sh
+target=/home/$USER/.local/bin/gamescripts
+base=/home/$USER/.local/share/applications
+blacklist=$(cat $target/list)
+state="1"
+cd $base
+for file in *.desktop
+    do
+        tmp=$(cat "$file" | grep -m 1 ^Name | cut -b 6- | tr ' ' '_')
+        noblank=$(echo "$file" | tr ' ' '_')
+        for line in $blacklist
+        do
+            if [ "$line" == "$noblank" ] ;then
+                echo "$noblank already exists"
+                state="0"
+            fi
+        done
+        if [ $state == "1" ] ;then
+            echo "$target/$tmp"
+            echo '#!/bin/bash' >> "$target/$tmp"
+            echo "dex \"$base/$file\"" >> "$target/$tmp"
+            chmod +x "$target/$tmp"
+            echo "$noblank" >> "$target/list"
+        fi
+        state="1"
+   done
